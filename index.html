@@ -52,6 +52,11 @@ html{scroll-behavior:smooth}body{margin:0;background:#111311}
 .remove-item:hover{color:#ff9d9d}
 .cart-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:13px;color:var(--muted)}
 .cart-total strong{font-size:22px;color:var(--lime);font-family:Manrope}
+.admin .look-foto{cursor:pointer;position:relative}
+.admin .look-foto::after{content:"Editar";position:absolute;top:10px;right:10px;background:#d6f24a;color:#15180f;font:700 10px 'DM Sans';padding:4px 9px;border-radius:999px;letter-spacing:.08em}
+.eacoes-topo{margin:0 0 14px}
+.ebtn.del{float:right;border-color:#7a3b3b;color:#ff9f9f;font-size:11px;padding:5px 10px}
+.elook h4{overflow:hidden}
 .emostrar{display:flex;align-items:center;gap:7px;font-size:12px;color:#b9beb5;margin:-4px 0 10px}
 .cart-checkout{width:100%;margin-bottom:10px;padding-left:14px;padding-right:14px;font-size:12.5px;box-sizing:border-box}
 .clear-cart{width:100%;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:11px;font-size:12px;cursor:pointer}
@@ -333,6 +338,7 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
       </div>
       <label>Texto do topo<textarea data-loja="heroDesc"></textarea></label>
     </div>
+    <div class="eacoes-topo"><button class="ebtn pri" id="addLook">+ Adicionar produto</button></div>
     <div id="editaLooks"></div>
     <p class="edica">
       <b>Como funciona.</b> Nada é gravado sozinho. Quando terminar, clique em
@@ -1301,7 +1307,8 @@ function montarEditor(){
   document.querySelectorAll("[data-loja]").forEach(el => el.value = LOJA[el.dataset.loja] ?? "");
   document.getElementById("editaLooks").innerHTML = LOOKS.map((lk, i) => `
     <div class="elook">
-      <h4>Look ${String(i+1).padStart(2,"0")} — total ${money(Number(lk.camisa.preco)+Number(lk.bermuda.preco))}</h4>
+      <h4 id="ed-${lk.id}">Look ${String(i+1).padStart(2,"0")} — total ${money(Number(lk.camisa.preco)+Number(lk.bermuda.preco))}
+        <button class="ebtn del" data-del="${lk.id}">Excluir produto</button></h4>
       <label class="emostrar"><input type="checkbox" data-mostrar="${lk.id}" ${lk.oculto?"":"checked"}> Mostrar na loja</label>
       <div class="elook-topo">
         <div class="epc-foto">
@@ -1340,7 +1347,35 @@ function ligarUsar(){
   });
 }
 
+function abrirEditorNoLook(id){
+  montarEditor();
+  document.getElementById("editor").classList.add("on");
+  document.body.style.overflow = "hidden";
+  const alvo = document.getElementById("ed-" + id);
+  if(alvo) alvo.scrollIntoView({block:"start"});
+}
+
+function novaPeca(cat){
+  return { nome: cat === "camisa" ? "Nova camisa" : "Nova bermuda", desc: "", material: "", caimento: "Regular",
+    preco: 0, tamanhos: ["P","M","G","GG","G1","G2","G3","G4"], custo: "", margem: "", cat };
+}
+
 function ligarEditor(){
+  document.querySelectorAll("[data-del]").forEach(el => el.onclick = () => {
+    const lk = LOOKS.find(x => String(x.id) === el.dataset.del);
+    if(!lk) return;
+    if(!confirm("Excluir este produto da loja?")) return;
+    LOOKS.splice(LOOKS.indexOf(lk), 1);
+    marcar(); montarEditor(); montarCatalogo(); montarGaleria();
+  });
+  const add = document.getElementById("addLook");
+  if(add) add.onclick = () => {
+    const id = LOOKS.reduce((m,l) => Math.max(m, Number(l.id)||0), 0) + 1;
+    LOOKS.push({ id, foto: LOOKS[0] ? LOOKS[0].foto : "imagens/mascote.webp",
+      camisa: novaPeca("camisa"), bermuda: novaPeca("bermuda"), oculto: false });
+    marcar(); montarEditor(); montarCatalogo(); montarGaleria();
+    const el = document.getElementById("ed-" + id); if(el) el.scrollIntoView({block:"start"});
+  };
   document.querySelectorAll("[data-mostrar]").forEach(el => el.onchange = () => {
     const lk = LOOKS.find(x => String(x.id) === el.dataset.mostrar);
     if(lk){ lk.oculto = !el.checked; marcar(); montarCatalogo(); montarGaleria(); }
@@ -1401,7 +1436,41 @@ function reduzirFoto(file, cb){
   r.readAsDataURL(file);
 }
 
-document.getElementById("abrirEditor").onclick = () => {
+document.addEventListener("click", e => {
+  if(!document.body.classList.contains("admin")) return;
+  const foto = e.target.closest(".look-foto");
+  if(!foto) return;
+  const card = foto.closest(".look-card");
+  const btn = card && card.querySelector("[data-look]");
+  if(btn){ e.preventDefault(); e.stopPropagation(); abrirEditorNoLook(btn.dataset.look); }
+}, true);
+
+const SENHA_ADMIN = "pontofitness2026";
+const btnEditar = document.getElementById("abrirEditor");
+
+function modoAdminAtivo(){ return document.body.classList.contains("admin"); }
+function mostrarBotaoAdmin(){
+  const liberado = location.hash === "#admin" || sessionStorage.getItem("pf_admin") === "1";
+  btnEditar.style.display = liberado ? "" : "none";
+}
+mostrarBotaoAdmin();
+window.addEventListener("hashchange", mostrarBotaoAdmin);
+
+function entrarAdmin(){
+  if(modoAdminAtivo()) return true;
+  const t = prompt("Senha do administrador:");
+  if(t === null) return false;
+  if(t !== SENHA_ADMIN){ alert("Senha incorreta."); return false; }
+  document.body.classList.add("admin");
+  try { sessionStorage.setItem("pf_admin","1"); } catch(e){}
+  mostrarBotaoAdmin();
+  return true;
+}
+
+try { if(sessionStorage.getItem("pf_admin") === "1") document.body.classList.add("admin"); } catch(e){}
+
+btnEditar.onclick = () => {
+  if(!entrarAdmin()) return;
   montarEditor();
   document.getElementById("editor").classList.add("on");
   document.body.style.overflow = "hidden";
