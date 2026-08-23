@@ -1445,7 +1445,6 @@ document.addEventListener("click", e => {
   if(btn){ e.preventDefault(); e.stopPropagation(); abrirEditorNoLook(btn.dataset.look); }
 }, true);
 
-const SENHA_ADMIN = "pontofitness2026";
 const btnEditar = document.getElementById("abrirEditor");
 
 function modoAdminAtivo(){ return document.body.classList.contains("admin"); }
@@ -1455,16 +1454,14 @@ function mostrarBotaoAdmin(){
 }
 mostrarBotaoAdmin();
 window.addEventListener("hashchange", mostrarBotaoAdmin);
+try {
+  if(location.hash === "#admin" && sessionStorage.getItem("pf_admin") !== "1") location.href = "admin/";
+} catch(e){}
 
 function entrarAdmin(){
   if(modoAdminAtivo()) return true;
-  const t = prompt("Senha do administrador:");
-  if(t === null) return false;
-  if(t !== SENHA_ADMIN){ alert("Senha incorreta."); return false; }
-  document.body.classList.add("admin");
-  try { sessionStorage.setItem("pf_admin","1"); } catch(e){}
-  mostrarBotaoAdmin();
-  return true;
+  location.href = "admin/";
+  return false;
 }
 
 try { if(sessionStorage.getItem("pf_admin") === "1") document.body.classList.add("admin"); } catch(e){}
