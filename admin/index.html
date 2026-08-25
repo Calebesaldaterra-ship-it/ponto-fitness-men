@@ -42,23 +42,37 @@ button:active{transform:translateY(1px)}
   <h1>Entrar</h1>
   <p class="sub">Acesso para editar produtos, descrições e preços.</p>
   <div class="erro" id="erro">Usuário ou senha incorretos.</div>
-  <label>Usuário<input id="u" autocapitalize="off" autocorrect="off" required></label>
+  <label>E-mail<input id="u" type="email" autocapitalize="off" autocorrect="off" required></label>
   <label>Senha<input id="p" type="password" required></label>
   <button type="submit">Entrar no painel</button>
   <p class="pe"><a href="../">Voltar para a loja</a></p>
 </form>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script>
-const USUARIO = "admin";
-const SENHA = "pontofitness2026";
-document.getElementById("f").addEventListener("submit", e => {
+const firebaseConfig = {
+  apiKey: "AIzaSyA4r-A_7Ok3ulLSkjxjE8G78qbEQM4z09o",
+  authDomain: "ponto-fitness.firebaseapp.com",
+  projectId: "ponto-fitness",
+  storageBucket: "ponto-fitness.firebasestorage.app",
+  messagingSenderId: "650702339619",
+  appId: "1:650702339619:web:90d005e88bc79e208f3b96",
+  measurementId: "G-B63XQX0H1E"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+document.getElementById("f").addEventListener("submit", async e => {
   e.preventDefault();
   const u = document.getElementById("u").value.trim().toLowerCase();
   const p = document.getElementById("p").value;
-  if(u === USUARIO && p === SENHA){
-    try { sessionStorage.setItem("pf_admin","1"); } catch(err){}
+  const erro = document.getElementById("erro");
+  try {
+    await auth.signInWithEmailAndPassword(u, p);
+    try { sessionStorage.setItem("pf_admin", "1"); } catch(err){}
     location.href = "../#admin";
-  } else {
-    document.getElementById("erro").style.display = "block";
+  } catch(err) {
+    erro.textContent = "E-mail ou senha incorretos.";
+    erro.style.display = "block";
     document.getElementById("p").value = "";
     document.getElementById("p").focus();
   }
