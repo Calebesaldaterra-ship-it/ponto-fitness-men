@@ -247,6 +247,16 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
   const fbAuth = firebase.auth();
   const FB_COLLECTION = "site_ponto_fitness_men";
 </script>
+<style>
+.nav-admin{border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;border-radius:999px;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+.nav-admin:hover{border-color:#d9ff3f;color:#d9ff3f}
+.login-backdrop{position:fixed;inset:0;z-index:100;background:rgba(4,7,5,.78);display:grid;place-items:center;padding:24px}
+.login-backdrop[hidden]{display:none}
+.login-card{width:min(100%,430px);background:#111713;border:1px solid rgba(217,255,63,.24);border-radius:22px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.48);position:relative}
+.login-close{position:absolute;right:16px;top:14px;border:0;background:transparent;color:#aeb8ad;font-size:24px;cursor:pointer}
+.login-card .eyebrow{margin-bottom:12px}.login-card h2{margin:0 0 8px;font-size:32px}.login-card .login-sub{color:#aeb8ad;margin:0 0 24px;line-height:1.5}
+.login-card form{display:grid;gap:14px}.login-card label{display:grid;gap:7px;color:#dce4da;font-size:13px}.login-card input{width:100%;box-sizing:border-box;background:#0b0f0c;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:13px;color:#fff;font:inherit}.login-card input:focus{outline:2px solid #d9ff3f;border-color:transparent}.login-submit{border:0;border-radius:999px;background:#d9ff3f;color:#10150e;padding:13px 18px;font-weight:800;cursor:pointer}.login-status{min-height:20px;color:#ffb4a8;font-size:13px;margin:0}.login-status.ok{color:#d9ff3f}
+</style>
 </head>
 <body>
 <div class="site-shell">
@@ -254,6 +264,7 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
     <a class="brand" href="#top"><span class="brand-mark brand-logo"><img src="imagens/mascote.webp" alt="Logomarca Ponto Fitness" width="30" height="30" /></span><span id="storeName"></span></a>
     <nav><a href="#colecao">Coleção</a><a href="#galeria">Looks</a><a href="#essencia">Essência</a><a href="#contato">Contato</a></nav>
     <a class="nav-cta" id="waNav" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> Fale conosco</a>
+    <button class="nav-admin" id="abrirLogin" type="button">Área administrativa</button>
   </header>
 
   <main id="top">
@@ -1639,6 +1650,77 @@ if(_aviso && _fechar){
   if (!somas.length) { alvo.closest(".hero-tag").hidden = true; return; }
   alvo.textContent = "R$ " + Math.min.apply(null, somas).toFixed(2).replace(".", ",");
 })();
+</script>
+<div class="login-backdrop" id="loginModal" hidden>
+  <section class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <button class="login-close" id="fecharLogin" type="button" aria-label="Fechar login">×</button>
+    <p class="eyebrow">ÁREA ADMINISTRATIVA</p>
+    <h2 id="loginTitle">Acesse sua loja.</h2>
+    <p class="login-sub">Entre para editar produtos, descrições e preços com segurança.</p>
+    <form id="loginFirebaseForm">
+      <label>E-mail<input id="loginEmail" type="email" autocomplete="username" required></label>
+      <label>Senha<input id="loginSenha" type="password" autocomplete="current-password" required></label>
+      <button class="login-submit" type="submit">Entrar no painel</button>
+      <p class="login-status" id="loginStatus" role="status"></p>
+    </form>
+  </section>
+</div>
+<script>
+const abrirLogin = document.getElementById("abrirLogin");
+const loginModal = document.getElementById("loginModal");
+const fecharLogin = document.getElementById("fecharLogin");
+const loginForm = document.getElementById("loginFirebaseForm");
+const loginStatus = document.getElementById("loginStatus");
+function atualizarBotaoLogin(user){
+  const ok = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
+  abrirLogin.textContent = ok ? "Abrir painel" : "Área administrativa";
+  abrirLogin.setAttribute("aria-label", ok ? "Abrir painel administrativo" : "Abrir login administrativo");
+}
+fbAuth.onAuthStateChanged(atualizarBotaoLogin);
+abrirLogin.onclick = () => {
+  if(usuarioAdmin()){
+    location.hash = "#admin";
+    document.getElementById("abrirEditor").click();
+    return;
+  }
+  loginStatus.textContent = "";
+  loginStatus.classList.remove("ok");
+  loginModal.hidden = false;
+  setTimeout(() => document.getElementById("loginEmail").focus(), 0);
+};
+fecharLogin.onclick = () => { loginModal.hidden = true; };
+loginModal.addEventListener("click", e => { if(e.target === loginModal) loginModal.hidden = true; });
+loginForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const senha = document.getElementById("loginSenha").value;
+  const submit = loginForm.querySelector("button[type=submit]");
+  submit.disabled = true;
+  submit.textContent = "Entrando...";
+  loginStatus.textContent = "";
+  try {
+    const cred = await fbAuth.signInWithEmailAndPassword(email, senha);
+    if(!cred.user.email || cred.user.email.toLowerCase() !== ADMIN_EMAIL){
+      await fbAuth.signOut();
+      throw new Error("not-admin");
+    }
+    sessionStorage.setItem("pf_admin", "1");
+    loginStatus.textContent = "Login realizado. Abrindo painel...";
+    loginStatus.classList.add("ok");
+    setTimeout(() => {
+      loginModal.hidden = true;
+      location.hash = "#admin";
+      document.getElementById("abrirEditor").click();
+    }, 250);
+  } catch(err) {
+    loginStatus.textContent = err.message === "not-admin" ? "Este usuário não possui acesso administrativo." : "E-mail ou senha incorretos.";
+    loginStatus.classList.remove("ok");
+    document.getElementById("loginSenha").value = "";
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Entrar no painel";
+  }
+});
 </script>
 </body>
 </html>
