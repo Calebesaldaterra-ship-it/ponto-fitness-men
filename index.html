@@ -229,6 +229,24 @@ fbq('track','PageView');
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /></noscript>
 <!-- fim Meta Pixel -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA4r-A_7Ok3ulLSkjxjE8G78qbEQM4z09o",
+    authDomain: "ponto-fitness.firebaseapp.com",
+    projectId: "ponto-fitness",
+    storageBucket: "ponto-fitness.firebasestorage.app",
+    messagingSenderId: "650702339619",
+    appId: "1:650702339619:web:90d005e88bc79e208f3b96",
+    measurementId: "G-B63XQX0H1E"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const fbDb = firebase.firestore();
+  const fbAuth = firebase.auth();
+  const FB_COLLECTION = "site_ponto_fitness_men";
+</script>
 </head>
 <body>
 <div class="site-shell">
@@ -333,7 +351,7 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
     </div>
     <div class="grow"></div>
     <button class="ebtn" id="fecharEditor">Ver a loja</button>
-    <button class="ebtn pri" id="baixarLoja">Salvar loja atualizada</button>
+    <button class="ebtn pri" id="baixarLoja">Salvar alterações online</button>
   </div>
   <div class="edit-body">
     <div class="edit-loja">
@@ -350,8 +368,7 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
     <div id="editaLooks"></div>
     <p class="edica">
       <b>Como funciona.</b> Nada é gravado sozinho. Quando terminar, clique em
-      <b>Salvar loja atualizada</b> — o navegador baixa um <code>index.html</code> novo com tudo
-      que você mudou. Troque o arquivo antigo dentro da pasta <code>loja</code> por esse.<br>
+      <b>Salvar alterações online</b> — suas mudanças serão gravadas no banco da loja e ficarão disponíveis para todos os visitantes, sem baixar arquivos.<br>
       <b>Fotos.</b> Cada look tem uma foto, usada nas duas peças. Clique numa miniatura para trocar
       ou use <b>Enviar do computador</b>. Fotos enviadas são reduzidas automaticamente.<br>
       <b>Preço.</b> Preencha custo e margem e o preço sugerido aparece — é só clicar em Usar.
@@ -1131,9 +1148,24 @@ src="https://www.facebook.com/tr?id=1619275782890705&ev=PageView&noscript=1" /><
 </script>
 <script>
 const ICON = {"wa": "<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z\"/></svg>", "arrow": "<svg viewBox=\"0 0 24 24\" width=\"17\" height=\"17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"12 5 19 12 12 19\"/></svg>", "bag": "<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z\"/><line x1=\"3\" y1=\"6\" x2=\"21\" y2=\"6\"/><path d=\"M16 10a4 4 0 0 1-8 0\"/></svg>", "spark": "<svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m12 3-1.9 5.8L4 10.7l5.8 1.9L11.7 19l1.9-5.8L19.4 11l-5.8-1.9z\"/></svg>", "shield": "<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/><path d=\"m9 12 2 2 4-4\"/></svg>", "truck": "<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"1\" y=\"3\" width=\"15\" height=\"13\"/><path d=\"M16 8h4l3 3v5h-7z\"/><circle cx=\"5.5\" cy=\"18.5\" r=\"2.5\"/><circle cx=\"18.5\" cy=\"18.5\" r=\"2.5\"/></svg>", "ig": "<svg viewBox=\"0 0 24 24\" width=\"17\" height=\"17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"2\" width=\"20\" height=\"20\" rx=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"4\"/><circle cx=\"17.5\" cy=\"6.5\" r=\"1\"/></svg>", "x": "<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"/><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/></svg>", "trash": "<svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"3 6 5 6 21 6\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>", "minus": "<svg viewBox=\"0 0 24 24\" width=\"13\" height=\"13\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg>", "plus": "<svg viewBox=\"0 0 24 24\" width=\"13\" height=\"13\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg>"};
-const DADOS = JSON.parse(document.getElementById("dados").textContent);
-const LOJA = DADOS.loja;
-const LOOKS = DADOS.looks;
+const DADOS_LOCAL = JSON.parse(document.getElementById("dados").textContent);
+let DADOS = DADOS_LOCAL;
+let LOJA = DADOS.loja;
+let LOOKS = DADOS.looks;
+
+async function carregarCatalogoFirebase(){
+  try {
+    const snap = await fbDb.collection(FB_COLLECTION).doc("catalogo").get();
+    const remoto = snap.exists ? snap.data() : null;
+    if(remoto && remoto.loja && Array.isArray(remoto.looks) && remoto.looks.length){
+      DADOS = remoto;
+      LOJA = remoto.loja;
+      LOOKS = remoto.looks;
+    }
+  } catch(err) {
+    console.warn("Não foi possível carregar o catálogo online; usando os dados locais.", err);
+  }
+}
 const visiveis = () => LOOKS.filter(l => !l.oculto);
 const TAM_PLUS = ["G1","G2","G3","G4"];
 const ehPlus = t => TAM_PLUS.includes(String(t).toUpperCase());
@@ -1544,21 +1576,34 @@ document.getElementById("fecharEditor").onclick = () => {
   document.body.style.overflow = "";
 };
 
-document.getElementById("baixarLoja").onclick = () => {
-  const copia = document.documentElement.cloneNode(true);
-  copia.querySelector("#dados").textContent = "\n" + JSON.stringify({ loja: LOJA, looks: LOOKS }, null, 1) + "\n";
-  ["#catalogo","#galeriaLooks","#cartBody","#editaLooks"].forEach(sel => {
-    const el = copia.querySelector(sel); if(el) el.innerHTML = "";
+document.getElementById("baixarLoja").onclick = async () => {
+  const btn = document.getElementById("baixarLoja");
+  const status = document.getElementById("esalvo");
+  const usuario = fbAuth.currentUser || await new Promise(resolve => {
+    const unsub = fbAuth.onAuthStateChanged(u => { unsub(); resolve(u); });
   });
-  const ed = copia.querySelector("#editor"); if(ed) ed.classList.remove("on");
-  const ov = copia.querySelector("#cartOverlay"); if(ov) ov.setAttribute("hidden","");
-  const bd = copia.querySelector("body"); bd.style.overflow = ""; bd.className = "";
-  const es = copia.querySelector("#esalvo"); if(es) es.textContent = "";
-  const blob = new Blob(["<!doctype html>\n" + copia.outerHTML], {type:"text/html;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = "index.html"; a.click();
-  URL.revokeObjectURL(a.href);
-  alterado = false; document.getElementById("esalvo").textContent = "";
+  if(!usuario){
+    status.textContent = "· faça login novamente para salvar";
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Salvando online...";
+  try {
+    await fbDb.collection(FB_COLLECTION).doc("catalogo").set({
+      loja: JSON.parse(JSON.stringify(LOJA)),
+      looks: JSON.parse(JSON.stringify(LOOKS)),
+      atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alterado = false;
+    status.textContent = "· salvo online";
+  } catch(err) {
+    console.error(err);
+    status.textContent = "· não foi possível salvar";
+    alert("Não foi possível salvar no banco. Verifique o login e as regras do Firebase.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Salvar alterações online";
+  }
 };
 
 window.addEventListener("beforeunload", e => { if(alterado){ e.preventDefault(); e.returnValue = ""; } });
@@ -1570,10 +1615,13 @@ if(_aviso && _fechar){
   _fechar.onclick = () => { _aviso.remove(); document.body.classList.remove("tem-aviso"); };
 }
 
-aplicarTextos();
-montarCatalogo();
-montarGaleria();
-montarCarrinho();
+(async function iniciarLoja(){
+  await carregarCatalogoFirebase();
+  aplicarTextos();
+  montarCatalogo();
+  montarGaleria();
+  montarCarrinho();
+})();
 
 // "a partir de" do topo: menor soma camisa + bermuda do catálogo. Calculado na
 // hora, para acompanhar sozinho qualquer mudança de preço.

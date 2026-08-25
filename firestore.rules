@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /empresas/{empresaId} {
+      allow read: if resource.data.ativa == true;
+      allow write: if false;
+    }
+
+    match /categorias/{categoriaId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /produtos/{produtoId} {
+      allow read: if resource.data.publicado == true;
+      allow write: if false;
+
+      match /variacoes/{variacaoId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    match /clientes/{clienteId} {
+      allow read, write: if false;
+    }
+
+    match /cupons/{cupomId} {
+      allow read, write: if false;
+    }
+
+    match /pedidos/{pedidoId} {
+      allow read, write: if false;
+
+      match /itens/{itemId} {
+        allow read, write: if false;
+      }
+    }
+
+    // Catálogo exclusivo da página Ponto Fitness for Men.
+    // Visitantes podem ler a vitrine; somente usuários autenticados podem gravar.
+    match /site_ponto_fitness_men/{documentId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Negar qualquer coleção não prevista explicitamente.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
