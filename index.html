@@ -1166,7 +1166,7 @@ let LOOKS = DADOS.looks;
 
 async function carregarCatalogoFirebase(){
   try {
-    const snap = await fbDb.collection(FB_COLLECTION).doc("catalogo").get();
+    const snap = await fbDb.collection(FB_COLLECTION).doc("catalogo").get({source: "server"});
     const remoto = snap.exists ? snap.data() : null;
     if(remoto && remoto.loja && Array.isArray(remoto.looks) && remoto.looks.length){
       DADOS = remoto;
@@ -1637,19 +1637,23 @@ if(_aviso && _fechar){
   montarCatalogo();
   montarGaleria();
   montarCarrinho();
+  atualizarPrecoHero();
 })();
 
 // "a partir de" do topo: menor soma camisa + bermuda do catálogo. Calculado na
 // hora, para acompanhar sozinho qualquer mudança de preço.
-(function(){
+function atualizarPrecoHero(){
   var alvo = document.getElementById("heroFrom");
   if (!alvo || typeof LOOKS === "undefined") return;
   var somas = LOOKS
     .map(function(l){ return Number(l.camisa && l.camisa.preco) + Number(l.bermuda && l.bermuda.preco); })
     .filter(function(v){ return isFinite(v) && v > 0; });
   if (!somas.length) { alvo.closest(".hero-tag").hidden = true; return; }
+  alvo.closest(".hero-tag").hidden = false;
   alvo.textContent = "R$ " + Math.min.apply(null, somas).toFixed(2).replace(".", ",");
-})();
+}
+
+atualizarPrecoHero();
 </script>
 <div class="login-backdrop" id="loginModal" hidden>
   <section class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
