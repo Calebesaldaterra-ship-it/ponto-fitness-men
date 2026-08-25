@@ -42,7 +42,8 @@ service cloud.firestore {
     // Visitantes podem ler a vitrine; somente usuários autenticados podem gravar.
     match /site_ponto_fitness_men/{documentId} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null;
+      allow create, update, delete: if request.auth != null
+        && request.auth.token.email == 'calebesaldaterra@gmail.com';
     }
 
     // Negar qualquer coleção não prevista explicitamente.

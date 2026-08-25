@@ -1546,24 +1546,29 @@ document.addEventListener("click", e => {
 
 const btnEditar = document.getElementById("abrirEditor");
 
-function modoAdminAtivo(){ return document.body.classList.contains("admin"); }
-function mostrarBotaoAdmin(){
-  const liberado = location.hash === "#admin" || sessionStorage.getItem("pf_admin") === "1";
-  btnEditar.style.display = liberado ? "" : "none";
+const ADMIN_EMAIL = "calebesaldaterra@gmail.com";
+function usuarioAdmin(){
+  const u = fbAuth.currentUser;
+  return !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL);
 }
-mostrarBotaoAdmin();
+function modoAdminAtivo(){ return document.body.classList.contains("admin") && usuarioAdmin(); }
+function mostrarBotaoAdmin(){
+  btnEditar.style.display = usuarioAdmin() ? "" : "none";
+}
+function aplicarEstadoAdmin(user){
+  const ok = !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL);
+  document.body.classList.toggle("admin", ok);
+  mostrarBotaoAdmin();
+  if(location.hash === "#admin" && !ok) location.href = "admin/";
+}
+fbAuth.onAuthStateChanged(aplicarEstadoAdmin);
 window.addEventListener("hashchange", mostrarBotaoAdmin);
-try {
-  if(location.hash === "#admin" && sessionStorage.getItem("pf_admin") !== "1") location.href = "admin/";
-} catch(e){}
 
 function entrarAdmin(){
   if(modoAdminAtivo()) return true;
   location.href = "admin/";
   return false;
 }
-
-try { if(sessionStorage.getItem("pf_admin") === "1") document.body.classList.add("admin"); } catch(e){}
 
 btnEditar.onclick = () => {
   if(!entrarAdmin()) return;
